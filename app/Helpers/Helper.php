@@ -1,5 +1,6 @@
 <?php
 
+use App\Repositories\Setting\SettingRepositoryInterface;
 use Random\RandomException;
 
 if (! function_exists('randomizeTtl')) {
@@ -34,5 +35,18 @@ if (! function_exists('buildCacheKey')) {
     function buildCacheKey(string $entity, string $identifier): string
     {
         return $entity.':'.$identifier;
+    }
+}
+
+if (! function_exists('setting')) {
+    /**
+     * Đọc một cấu hình hệ thống theo key (có cache qua SettingRepository).
+     *
+     * @param  string  $key  Setting key (vd `reminder_lead_minutes`)
+     * @param  mixed  $default  Giá trị mặc định nếu chưa cấu hình
+     */
+    function setting(string $key, mixed $default = null): mixed
+    {
+        return app(SettingRepositoryInterface::class)->get($key, $default);
     }
 }
