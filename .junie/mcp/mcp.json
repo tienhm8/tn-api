@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "/home/tienhm/.config/herd-lite/bin/php",
+            "args": [
+                "/var/www/tienhm/tiennhan/tn-api/artisan",
+                "boost:mcp"
+            ]
+        }
+    }
+}
