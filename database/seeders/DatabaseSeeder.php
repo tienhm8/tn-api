@@ -12,7 +12,11 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(RolePermissionSeeder::class);
+        $this->call([
+            RolePermissionSeeder::class,
+            ServiceSeeder::class,
+            SettingSeeder::class,
+        ]);
 
         $accounts = [
             ['name' => 'Quản trị hệ thống', 'email' => 'admin@tn.local', 'role' => 'admin'],
