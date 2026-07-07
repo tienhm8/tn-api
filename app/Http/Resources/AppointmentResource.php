@@ -26,6 +26,16 @@ class AppointmentResource extends JsonResource
             'reminder_sent_at' => $this->reminder_sent_at,
             'completed_at' => $this->completed_at,
             'user' => new UserBriefResource($this->whenLoaded('user')),
+            'customer' => $this->whenLoaded('customer', fn (): array => [
+                'id' => $this->customer->id,
+                'code' => $this->customer->code,
+                'company_name' => $this->customer->company_name,
+                'phone' => $this->customer->phone,
+                'status' => [
+                    'value' => $this->customer->status->value,
+                    'label' => $this->customer->status->label(),
+                ],
+            ]),
             'created_at' => $this->created_at,
         ];
     }

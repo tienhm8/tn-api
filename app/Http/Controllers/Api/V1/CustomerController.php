@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Api\V1;
 use App\Enums\CustomerStatus;
 use App\Enums\LostReason;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Customer\AddNoteRequest;
 use App\Http\Requests\Customer\ChangeStatusRequest;
 use App\Http\Requests\Customer\ImportCustomersRequest;
 use App\Http\Requests\Customer\ReassignCustomerRequest;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
+use App\Http\Resources\CustomerActivityResource;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Repositories\Customer\CustomerRepositoryInterface;
@@ -129,6 +131,22 @@ class CustomerController extends Controller
             Log::error('Customer status change failed', ['customer_id' => $customer->id, 'action' => 'changeStatus', 'error' => $e->getMessage()]);
 
             return response()->json(['message' => 'Không thể đổi trạng thái.'], 500);
+        }
+    }
+
+    public function addNote(AddNoteRequest $request, Customer $customer): JsonResponse
+    {
+        $this->authorize('update', $customer);
+
+        try {
+            $activity = $this->customerService->addNote($customer, $request->validated('content'), $request->user());
+            Log::info('Customer note added', ['customer_id' => $customer->id, 'action' => 'addNote']);
+
+            return (new CustomerActivityResource($activity))->response()->setStatusCode(201);
+        } catch (\Throwable $e) {
+            Log::error('Customer note failed', ['customer_id' => $customer->id, 'action' => 'addNote', 'error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Không thể thêm ghi chú.'], 500);
         }
     }
 

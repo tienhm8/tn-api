@@ -7,6 +7,7 @@ use App\Enums\CustomerSource;
 use App\Enums\CustomerStatus;
 use App\Enums\LostReason;
 use App\Models\Customer;
+use App\Models\CustomerActivity;
 use App\Models\User;
 use App\Notifications\CustomerAssignedNotification;
 use App\Repositories\Customer\CustomerRepositoryInterface;
@@ -125,6 +126,16 @@ class CustomerService
         });
 
         return $customer->fresh(['services', 'assignee', 'creator']);
+    }
+
+    /**
+     * Ghi một ghi chú chăm sóc vào timeline khách hàng.
+     */
+    public function addNote(Customer $customer, string $content, User $actor): CustomerActivity
+    {
+        return $this->activities
+            ->log($customer->id, $actor->id, ActivityType::Note, $content)
+            ->load('user:id,name');
     }
 
     public function delete(Customer $customer): void

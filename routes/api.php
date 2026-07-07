@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
 use App\Http\Controllers\Api\V1\ServiceController;
@@ -43,4 +44,12 @@ Route::middleware('auth.jwt')->group(function (): void {
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy']);
     Route::post('customers/{customer}/reassign', [CustomerController::class, 'reassign'])->middleware('permission:customers.reassign');
     Route::post('customers/{customer}/status', [CustomerController::class, 'changeStatus']);
+    Route::post('customers/{customer}/notes', [CustomerController::class, 'addNote']);
+
+    // Lịch chăm sóc / gọi lại
+    Route::get('appointments', [AppointmentController::class, 'index']);
+    Route::post('appointments', [AppointmentController::class, 'store'])->middleware('permission:appointments.manage');
+    Route::put('appointments/{appointment}', [AppointmentController::class, 'update'])->middleware('permission:appointments.manage');
+    Route::post('appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->middleware('permission:appointments.manage');
+    Route::post('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->middleware('permission:appointments.manage');
 });

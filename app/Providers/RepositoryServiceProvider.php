@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Repositories\Appointment\AppointmentRepository;
+use App\Repositories\Appointment\AppointmentRepositoryInterface;
 use App\Repositories\Customer\CustomerRepository;
 use App\Repositories\Customer\CustomerRepositoryInterface;
 use App\Repositories\CustomerActivity\CustomerActivityRepository;
@@ -27,6 +29,7 @@ class RepositoryServiceProvider extends ServiceProvider
         ServiceRepositoryInterface::class => ServiceRepository::class,
         CustomerRepositoryInterface::class => CustomerRepository::class,
         CustomerActivityRepositoryInterface::class => CustomerActivityRepository::class,
+        AppointmentRepositoryInterface::class => AppointmentRepository::class,
     ];
 
     public function register(): void
