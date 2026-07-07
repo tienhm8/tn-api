@@ -36,6 +36,8 @@ Route::middleware('auth.jwt')->group(function (): void {
     // Khách hàng
     Route::get('customers', [CustomerController::class, 'index']);
     Route::post('customers', [CustomerController::class, 'store'])->middleware('permission:customers.create');
+    Route::post('customers/import', [CustomerController::class, 'import'])->middleware('permission:customers.import');
+    Route::get('customers/import/template', [CustomerController::class, 'template'])->middleware('permission:customers.import');
     Route::get('customers/{customer}', [CustomerController::class, 'show']);
     Route::put('customers/{customer}', [CustomerController::class, 'update']);
     Route::delete('customers/{customer}', [CustomerController::class, 'destroy']);

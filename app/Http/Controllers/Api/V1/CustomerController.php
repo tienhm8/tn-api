@@ -6,16 +6,19 @@ use App\Enums\CustomerStatus;
 use App\Enums\LostReason;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Customer\ChangeStatusRequest;
+use App\Http\Requests\Customer\ImportCustomersRequest;
 use App\Http\Requests\Customer\ReassignCustomerRequest;
 use App\Http\Requests\Customer\StoreCustomerRequest;
 use App\Http\Requests\Customer\UpdateCustomerRequest;
 use App\Http\Resources\CustomerResource;
 use App\Models\Customer;
 use App\Repositories\Customer\CustomerRepositoryInterface;
+use App\Services\CustomerImportService;
 use App\Services\CustomerService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class CustomerController extends Controller
@@ -23,6 +26,7 @@ class CustomerController extends Controller
     public function __construct(
         private CustomerService $customerService,
         private CustomerRepositoryInterface $customers,
+        private CustomerImportService $importService,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -126,5 +130,32 @@ class CustomerController extends Controller
 
             return response()->json(['message' => 'Không thể đổi trạng thái.'], 500);
         }
+    }
+
+    public function import(ImportCustomersRequest $request): JsonResponse
+    {
+        try {
+            $summary = $this->importService->import($request->file('file'), $request->user());
+            Log::info('Customers imported', [
+                'imported' => $summary['imported'],
+                'failed' => $summary['failed'],
+                'by' => $request->user()->id,
+                'action' => 'import',
+            ]);
+
+            return response()->json($summary);
+        } catch (\Throwable $e) {
+            Log::error('Customers import failed', ['action' => 'import', 'error' => $e->getMessage()]);
+
+            return response()->json(['message' => 'Không thể import file.'], 500);
+        }
+    }
+
+    public function template(): Response
+    {
+        return response($this->importService->buildTemplate(), 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="mau_import_khach_hang.xlsx"',
+        ]);
     }
 }

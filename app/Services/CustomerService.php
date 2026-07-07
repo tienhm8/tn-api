@@ -27,20 +27,20 @@ class CustomerService
      *
      * @param  array<string, mixed>  $data
      */
-    public function create(array $data, User $creator): Customer
+    public function create(array $data, User $creator, CustomerSource $source = CustomerSource::Manual): Customer
     {
         $serviceIds = $data['service_ids'] ?? [];
         unset($data['service_ids']);
 
         /** @var array{0: Customer, 1: int|null} $result */
-        $result = DB::transaction(function () use ($data, $creator, $serviceIds): array {
+        $result = DB::transaction(function () use ($data, $creator, $serviceIds, $source): array {
             $code = $this->settings->nextCustomerCode();
             $saleId = $this->saleAssignment->pickNextSale();
 
             $customer = $this->customers->create(array_merge($data, [
                 'code' => $code,
                 'created_by' => $creator->id,
-                'source' => CustomerSource::Manual->value,
+                'source' => $source->value,
                 'assigned_to' => $saleId,
                 'assigned_at' => $saleId ? now() : null,
                 'status' => $saleId ? CustomerStatus::Assigned->value : CustomerStatus::New->value,
@@ -50,7 +50,13 @@ class CustomerService
                 $customer->services()->sync($serviceIds);
             }
 
-            $this->activities->log($customer->id, $creator->id, ActivityType::Created, 'Tạo khách hàng: '.$customer->company_name);
+            $isImport = $source === CustomerSource::Import;
+            $this->activities->log(
+                $customer->id,
+                $creator->id,
+                $isImport ? ActivityType::Imported : ActivityType::Created,
+                ($isImport ? 'Import khách hàng: ' : 'Tạo khách hàng: ').$customer->company_name
+            );
 
             if ($saleId) {
                 $this->activities->log($customer->id, $creator->id, ActivityType::Assigned, 'Tự động giao cho sale #'.$saleId.' (round-robin)');
