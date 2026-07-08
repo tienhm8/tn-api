@@ -14,9 +14,13 @@ return Application::configure(basePath: dirname(__DIR__))
         web: __DIR__.'/../routes/web.php',
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
         health: '/up',
         apiPrefix: 'api/v1',
+    )
+    // Broadcast auth qua JWT (stateless): endpoint POST /api/v1/broadcasting/auth
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        attributes: ['prefix' => 'api/v1', 'middleware' => ['auth.jwt']],
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([

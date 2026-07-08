@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\ServiceController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
@@ -52,4 +53,9 @@ Route::middleware('auth.jwt')->group(function (): void {
     Route::put('appointments/{appointment}', [AppointmentController::class, 'update'])->middleware('permission:appointments.manage');
     Route::post('appointments/{appointment}/complete', [AppointmentController::class, 'complete'])->middleware('permission:appointments.manage');
     Route::post('appointments/{appointment}/cancel', [AppointmentController::class, 'cancel'])->middleware('permission:appointments.manage');
+
+    // Thông báo (chuông realtime)
+    Route::get('notifications', [NotificationController::class, 'index']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
 });

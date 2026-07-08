@@ -7,6 +7,8 @@ use App\Models\Appointment;
 use App\Models\User;
 use App\Repositories\EloquentRepository;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 class AppointmentRepository extends EloquentRepository implements AppointmentRepositoryInterface
 {
@@ -41,6 +43,17 @@ class AppointmentRepository extends EloquentRepository implements AppointmentRep
             ->where('customer_id', $customerId)
             ->where('status', AppointmentStatus::Scheduled->value)
             ->min('scheduled_at');
+    }
+
+    public function dueForReminder(Carbon $threshold): Collection
+    {
+        return Appointment::query()
+            ->where('status', AppointmentStatus::Scheduled->value)
+            ->whereNull('reminder_sent_at')
+            ->where('scheduled_at', '<=', $threshold)
+            ->with(['customer:id,code,company_name', 'user'])
+            ->orderBy('scheduled_at')
+            ->get();
     }
 
     /**
