@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\V1\AppointmentController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\CustomerController;
+use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\ServiceController;
+use App\Http\Controllers\Api\V1\SettingController;
 use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,4 +60,11 @@ Route::middleware('auth.jwt')->group(function (): void {
     Route::get('notifications', [NotificationController::class, 'index']);
     Route::post('notifications/read-all', [NotificationController::class, 'markAllRead']);
     Route::post('notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+    // Dashboard tổng hợp theo role
+    Route::get('dashboard/summary', [DashboardController::class, 'summary']);
+
+    // Cấu hình hệ thống (admin)
+    Route::get('settings', [SettingController::class, 'index'])->middleware('permission:settings.manage');
+    Route::put('settings', [SettingController::class, 'update'])->middleware('permission:settings.manage');
 });
